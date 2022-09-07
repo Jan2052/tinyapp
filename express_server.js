@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs")
+app.use(express.urlencoded({ extended: true }));
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -11,6 +12,11 @@ const urlDatabase = {
 
 app.get("/", (req, res) => {
   res.send("Hello!");
+});
+
+app.post("/urls", (req, res) => {
+  console.log(req.body); // Log the POST request body to the console
+  res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/urls", (req, res) => {
@@ -47,4 +53,6 @@ app.get("/set", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-//<%- include('partials/_header') %>
+
+function generateRandomString() {}
+generateRandomString()
