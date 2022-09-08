@@ -14,13 +14,12 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-// creates short url for longURL
+// creates short url for website and redirects user to database
 app.post("/urls", (req, res) => {
   const id = generateRandomString()
   urlDatabase[id] = req.body.longURL
   res.redirect("/urls")
   console.log(req.body); // Log the POST request body to the console
-  res.send('Ok'); // Respond with 'Ok' (we will replace this)
 });
 
 //redirects to url
@@ -30,7 +29,6 @@ app.get("/u/:id", (req, res) => {
     res.redirect(longURL);
     return;
   }
-
   res.send('404 Page not found');
 });
 
@@ -69,8 +67,17 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+// function generateRandomString() {
+//   const randomString = Math.random().toString(36).substring(6)
+//   return randomString
+// }
+// generateRandomString()
+
 function generateRandomString() {
-  const randomString = Math.random().toString(36).substring(6)
-  return randomString
+  let randomString = '';
+  let characters = '012345679abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (let i = 0; i < 6; i++) {
+      randomString += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return randomString;
 }
-generateRandomString()
