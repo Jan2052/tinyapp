@@ -12,21 +12,7 @@
 </head>
 
 <body>
-  <header>
-    <nav class="navbar navbar-expand-md navbar-dark bg-success">
-      <a class="navbar-brand" href="/urls">TinyApp</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        <div class="navbar-nav">
-          <a class="nav-item nav-link" href="/urls">My URLs</a>
-          <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        </div>
-      </div>
-    </nav>
-  </header>
+  <%- include('partials/_header') %>
   <main style="margin: 1em;">
     <h3>My URLs</h3>
     <table class="table">
@@ -39,12 +25,20 @@
       <tbody>
         <% for (let id in urls) { %>
           <tr>
-            <td><%= id %></td>
-            <td><%= urls[id] %><td>
+            <td>
+              <%= id %>
+            </td>
+            <td>
+              <%= urls[id] %>
+            <td>
+              <a class="nav-item nav-link" href="/urls/<%= id %>"><button type="submit" class="btn btn-outline-warning">Edit</button></a>
+            </td>
+            <td>
               <form method="POST" action="/urls/<%= id %>/delete">
                 <button type="submit" class="btn btn-outline-danger">Delete</button>
               </form>
-              </td>                
+            </td>
+            </td>
             </td>
           </tr>
           <% } %>
