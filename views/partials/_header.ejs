@@ -1,15 +1,8 @@
 <header>
   <nav class="navbar navbar-expand-md navbar-dark bg-success">
     <a class="navbar-brand" href="/urls">TinyApp</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-toggle="collapse"
-      data-target="#navbarNavAltMarkup"
-      aria-controls="navbarNavAltMarkup"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
@@ -18,32 +11,29 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
 
-      <% if (username) { %>
-        <span>Logged in as: <%= username %> </span>
+      <% if (user_id) { %>
+        <span>Logged in as: <%= user_id %> </span>
         <form action="/logout" method="POST">
           <div class="form-inline">
-          <button type="submit" class="btn btn-primary">Log Out</button> 
+            <button type="submit" class="btn btn-primary">Log Out</button>
           </div>
         </form>
 
-      <% } else { %>
-        <form action="/login" method="POST">
-          <div class="form-inline">
-          <input class="form-control" type="text" name="username" placeholder="Enter username"
-            style="width: 300px; margin:0 auto;">
-          <button type="submit" class="btn btn-primary">Log in</button> 
-          </div>
-        </form>
-      <% } %>
+        <% } else { %>
+          <form action="/login" method="GET">
+            <div class="form-inline">
+              <input class="form-control" type="text" name="user_id" placeholder="Enter username"
+                style="width: 300px; margin:0 auto;">
+              <button type="submit" class="btn btn-primary">Log in</button>
+            </div>
+          </form>
 
-    
-    <!--<form action="/register" method="POST">
-      <div class="form-inline">
-      <button type="submit" class="btn btn-primary">Register</button> 
-      </div>
-    </form>-->
-
-
+          <form action="/urls/register" method="GET">
+            <div class="form-inline">
+              <button type="submit" class="btn btn-primary">Register</button>
+            </div>
+          </form>
+          <% } %>
 
     </div>
   </nav>

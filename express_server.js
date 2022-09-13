@@ -14,40 +14,45 @@ const urlDatabase = {
 
 const userDb = {
   '8da584': {
-    username: '8da584',
+    id: '8da584',
     email: 'hello@gmail.com',
     password: 'password',
   },
   '8da585': {
-    username: '8da585',
+    id: '8da585',
     email: 'world@gmail.com',
     password: 'password123',
   }
 }
 
-// Login button not on main url page
-// Couldn't display username // user_id cookie not working (user not defined in)
-// 
-
-
 app.get('/login', (req, res) => {
   res.render('login')
-})
+});
+
+// Registering New Users
+// Update all endpoints that pass username value to templates to pass entire user object to template instead and change logic as follows:
+// Look up user object in users objects using userid cookie value
+// Pass user object to templates
+
+//Registration Errors
+//Finding a user in the users object from its email is something we'll need to do in other routes as well. We recommend creating an user lookup helper function to keep your code DRY. This function would take in an email as a parameter, and return either the entire user object or null if not found.
+
+
 // LOGIN
 app.post("/login", (req, res) => {
-  const {username, email, password } = req.body
-  
+  const { user_id, email, password } = req.body
+
   for (const key in userDb) {
-    if(Object.hasOwnProperty.call(userDb, key)) {
+    if (Object.hasOwnProperty.call(userDb, key)) {
       const dbUser = userDb[key];
-        if (dbUser.username === req.body) {
-          return res.status(403).send('Email is already taken')
-        }
+      if (dbUser.user_id === req.body) {
+        return res.status(403).send('Email is already taken')
+      }
     }
   }
 
   console.log(userDb)
-  res.cookie('username',username)
+  res.cookie('user_id', user_id)
   res.redirect('/urls')
 });
 
@@ -84,24 +89,53 @@ app.get("/u/:id", (req, res) => {
 
 // Shows USERNAME when logged in
 app.get("/urls", (req, res) => {
-  const username = req.cookies['username'];
-  // if(!username) return res.render('urls_index', { urls: urlDatabase, user: null});
-
-  // const currentUser = userDb[userId];
-  // if (!currentUser) return res.send('User not found');
-  // console.log(userId)
-
-  // const userObject = currentUser[userId]
-  // console.log(userObject)
-  
-  const templateVars = { urls: urlDatabase , username: username};
+  const user_id = req.cookies['user_id'];
+  const templateVars = { urls: urlDatabase, user_id: user_id };
   return res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  const username = req.cookies['username'];
-  const templateVars = { urls: urlDatabase , username: username};
+  const user_id = req.cookies['user_id'];
+  const templateVars = { urls: urlDatabase, user_id: user_id };
   res.render("urls_new", templateVars);
+});
+
+app.get("/urls/register", (req, res) => {
+  const user_id = req.cookies['user_id'];
+  const email = req.cookies['email'];
+  const password = req.cookies['password'];
+  const templateVars = { urls: urlDatabase, user_id: user_id, email: email, password: password };
+  res.render("urls_register", templateVars);
+});
+
+// REGISTER
+app.post("/urls/register", (req, res) => {
+  const { email, password } = req.body;
+
+  if (email === '' || password === '') {
+    return res.status(400).send('Missing information', email)
+  }
+  for (const key in userDb) {
+    const dbUser = userDb[key]
+    if (email === dbUser.email) {
+      return res.status(400).send('Email already exists')
+    }
+  }
+
+  const userId = generateRandomString()
+  const newUser = {
+    [userId]: {
+      id: userId,
+      email,
+      password,
+    }
+  }
+  userDb[userId] = newUser
+  console.log(userDb)
+
+  res.cookie('user_id', userId)
+  res.redirect('/urls')
+  // res.render("urls_register", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -111,13 +145,13 @@ app.get("/urls/:id", (req, res) => {
 
 //AUTH ENDPOINTS
 app.get("/urls", (req, res) => {
-  const templateVars = {user: null}
+  const templateVars = { user: null }
   res.render("/urls", templateVars);
 });
 
 // LOGOUT
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('urls')
 });
 
@@ -150,3 +184,13 @@ function generateRandomString() {
   }
   return randomString;
 }
+
+function getUserByEmail(email) {
+  for (const key in userDb){
+  const dbUser = userDb[key];
+  if (email === dbUser.email){
+    return Object.entries(userDb[key]);
+  } else {
+    return null;
+  }
+}}
