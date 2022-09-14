@@ -32,10 +32,9 @@ const userDb = {
 // Look up user object in users objects using userid cookie value
 // Pass user object to templates
 
-//Registration Errors
-//Finding a user in the users object from its email is something we'll need to do in other routes as well. We recommend creating an user lookup helper function to keep your code DRY. This function would take in an email as a parameter, and return either the entire user object or null if not found.
+// Edit button doesn't work anymore
 
-//How do I check which branch I'm on and my commits so far
+
 
 
 
