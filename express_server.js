@@ -25,9 +25,7 @@ const userDb = {
   }
 }
 
-app.get('/login', (req, res) => {
-  res.render('login')
-});
+
 
 // Registering New Users
 // Update all endpoints that pass username value to templates to pass entire user object to template instead and change logic as follows:
@@ -37,24 +35,11 @@ app.get('/login', (req, res) => {
 //Registration Errors
 //Finding a user in the users object from its email is something we'll need to do in other routes as well. We recommend creating an user lookup helper function to keep your code DRY. This function would take in an email as a parameter, and return either the entire user object or null if not found.
 
+//How do I check which branch I'm on and my commits so far
 
-// LOGIN
-app.post("/login", (req, res) => {
-  const { user_id, email, password } = req.body
 
-  for (const key in userDb) {
-    if (Object.hasOwnProperty.call(userDb, key)) {
-      const dbUser = userDb[key];
-      if (dbUser.user_id === req.body) {
-        return res.status(403).send('Email is already taken')
-      }
-    }
-  }
 
-  console.log(userDb)
-  res.cookie('user_id', user_id)
-  res.redirect('/urls')
-});
+
 
 // creates short url for website and redirects user to database
 app.post("/urls", (req, res) => {
@@ -100,12 +85,46 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+// REGISTER page
 app.get("/urls/register", (req, res) => {
   const user_id = req.cookies['user_id'];
   const email = req.cookies['email'];
   const password = req.cookies['password'];
   const templateVars = { urls: urlDatabase, user_id: user_id, email: email, password: password };
   res.render("urls_register", templateVars);
+});
+
+// LOGIN page
+app.get('/urls/login', (req, res) => {
+  const user_id = req.cookies['user_id'];
+  const email = req.cookies['email'];
+  const password = req.cookies['password'];
+  const templateVars = { urls: urlDatabase, user_id: user_id, email: email, password: password };
+  res.render("urls_login", templateVars);
+});
+
+// LOGIN
+app.post("/urls/login", (req, res) => {
+  const { email, password } = req.body;
+
+  // If a user with that e-mail cannot be found, return a response with a 403 status code.
+  if (!getUserByEmail(email)) {
+    return res.status(403).send('Email not found')
+  }
+
+  for (const key in userDb) {
+    const dbUser = userDb[key];
+    if (password !== dbUser.password) {
+      return res.status(403).send('Password is incorrect')
+    }
+    for (const key in userDb) {
+      const dbUser = userDb[key];
+      const user_id = dbUser.id;
+      console.log(userDb)
+      res.cookie('user_id', user_id);
+      res.redirect('/urls');
+    }
+  }
 });
 
 // REGISTER
@@ -135,7 +154,6 @@ app.post("/urls/register", (req, res) => {
 
   res.cookie('user_id', userId)
   res.redirect('/urls')
-  // res.render("urls_register", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -143,10 +161,13 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-//AUTH ENDPOINTS
 app.get("/urls", (req, res) => {
   const templateVars = { user: null }
   res.render("/urls", templateVars);
+});
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
 });
 
 // LOGOUT
@@ -155,9 +176,7 @@ app.post('/logout', (req, res) => {
   res.redirect('urls')
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+
 
 // app.get("/hello", (req, res) => {
 //   res.send("<html><body>Hello <b>World</b></body></html>\n");
@@ -185,12 +204,14 @@ function generateRandomString() {
   return randomString;
 }
 
+// Returns object if email exists in database | else returns null
 function getUserByEmail(email) {
-  for (const key in userDb){
-  const dbUser = userDb[key];
-  if (email === dbUser.email){
-    return Object.entries(userDb[key]);
-  } else {
-    return null;
+  for (const key in userDb) {
+    const dbUser = userDb[key];
+    if (email === dbUser.email) {
+      return Object.entries(userDb[key]);
+    } else {
+      return null;
+    }
   }
-}}
+}
