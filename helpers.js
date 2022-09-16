@@ -1,4 +1,4 @@
-function generateRandomString() {
+const generateRandomString = () => {
   let randomString = '';
   let characters = '012345679abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   for (let i = 0; i < 6; i++) {
@@ -7,7 +7,7 @@ function generateRandomString() {
   return randomString;
 };
 
-function getUserByEmail(email, userDb) {
+const getUserByEmail = (email, userDb) => {
   for (const key in userDb) {
     const user = userDb[key];
     if (email === user.email) {
