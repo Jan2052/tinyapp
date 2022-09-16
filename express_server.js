@@ -7,13 +7,17 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1'],
 
-  // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }))
 
-
 app.set("view engine", "ejs")
 app.use(express.urlencoded({ extended: true }));
+
+const {
+  generateRandomString,
+  getUserByEmail,
+  isLoggedin
+} = require('./helpers');
 
 const urlDatabase = {
   b6UTxQ: {
@@ -175,8 +179,6 @@ app.get("/urls/:id", (req, res) => {
     res.status(403).send('Only the owner may have edit access to this url')
   }
 
-
-
   const longURL = req.body.longURL
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user };
   res.render("urls_show", templateVars);
@@ -215,45 +217,3 @@ app.post("/urls/:id/delete", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-function generateRandomString() {
-  let randomString = '';
-  let characters = '012345679abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  for (let i = 0; i < 6; i++) {
-    randomString += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return randomString;
-}
-
-// Returns USER object if email exists in database | else returns null
-function getUserByEmail(email, userDb) {
-  for (const key in userDb) {
-    const user = userDb[key];
-    if (email === user.email) {
-      return user;
-    }
-  }
-  return null;
-}
-
-const isLoggedin = (req) => {
-  if (req.session.user_id) {
-    return true;
-  }
-  return false;
-};
-
-// function urlsForUsers(id) {
-// //returns URLs where userID equals id of logged in user and update code to:
-// // only display urls if the user is logged in
-// // only show urls that belong to the user when logged in
-// const userId = req.session.user_id;
-// const user = userDb[userId];
-// if (!user) {
-//   res.status(403).send('Please log in to edit url')
-// }
-
-//   if (userId !== urlDatabase[req.params.id].userID){
-//     res.status(403).send('Only the owner may have edit access to this url')
-//   }
-// }
