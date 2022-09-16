@@ -8,7 +8,7 @@ app.use(cookieSession({
   keys: ['key1'],
 
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+}));
 
 app.set("view engine", "ejs")
 app.use(express.urlencoded({ extended: true }));
@@ -38,20 +38,26 @@ const userDb = {
   },
   UPTXRn: {
     id: 'UPTXRn',
-    email: 'new@gmail.com',
+    email: '123@gmail.com',
     password: '$2a$10$CO/nibFz9ge2SZgJ3KS2RelhQnkUdOBTymrF600HWhS1gQEyXIYku'
   },
   xbq7LE: {
     id: 'xbq7LE',
     email: 'test@gmail.com',
     password: '$2a$10$wFdGK95fKRNfyNHXiL2PGeLjp/e2qOKENhtRLFpV2IrSlQ9uVHwwK'
-  }
-}
+  },
+};
 
 // URL page and shows USERNAME when logged in
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
+  console.log("session id", userId)
   const user = userDb[userId];
+  if (!user){
+    res.send('Please log in or register')
+    return
+  }
+  // console.log("testing user", user)
 
   //urlsForUser(id) function
   const userURL = {};
@@ -62,9 +68,8 @@ app.get("/urls", (req, res) => {
   }
 
   const templateVars = { urls: userURL, user };
-
   return res.render("urls_index", templateVars);
-});
+})
 
 //redirects to tiny url
 app.get("/u/:id", (req, res) => {
@@ -81,10 +86,9 @@ app.get("/u/:id", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
   const user = userDb[userId]
-  if (!user) {
+  if (!isLoggedin(req, userDb)) {
     return res.redirect("/login");
   }
-
   const templateVars = { urls: urlDatabase, user };
   res.render("urls_new", templateVars);
 });
@@ -93,11 +97,11 @@ app.get("/urls/new", (req, res) => {
 app.get("/register", (req, res) => {
   const { email, password } = req.body;
   const userId = req.session.user_id;
-  const user = userDb[userId]
+  const user = userDb[userId];
 
-  if (isLoggedin(req)) {
+  if (isLoggedin(req, userDb)) {
     return res.status(403).send('You are already registered')
-  }
+  };
 
   const templateVars = { urls: urlDatabase, user, email: email, password: password };
   res.render("register", templateVars);
@@ -108,11 +112,11 @@ app.post("/register", (req, res) => {
   const { email, password } = req.body;
 
   if (email === '' || password === '') {
-    return res.status(400).send('Missing information', email)
+    return res.status(400).send('Missing information', email);
   }
 
   if (getUserByEmail(email, userDb)) {
-    return res.status(400).send('Email already exists')
+    return res.status(400).send('Email already exists');
   }
 
   const userId = generateRandomString()
@@ -123,8 +127,7 @@ app.post("/register", (req, res) => {
     password: bcrypt.hashSync(password, 10)
 
   }
-  userDb[userId] = newUser
-  console.log(userDb)
+  userDb[userId] = newUser;
 
   req.session.user_id = userId
   res.redirect('/urls')
@@ -132,20 +135,21 @@ app.post("/register", (req, res) => {
 
 // LOGIN page
 app.get('/login', (req, res) => {
+  if (isLoggedin(req, userDb)){
+    res.redirect('/urls')
+  }
   res.render("login", { user: null });
 });
 
 // LOGIN
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  const user = getUserByEmail(email)
-
-  if (!user || !bcrypt.compareSync(password, user.password)) {
+  const user = getUserByEmail(email, userDb)
+  if (!user || !bcrypt.compareSync(password, userDb[user].password)) {
     return res.status(403).send('Invalid login')
   }
-  console.log(userDb)
 
-  req.session.user_id = user.id
+  req.session.user_id = user
   res.redirect('/urls');
 });
 
@@ -157,7 +161,6 @@ app.post('/logout', (req, res) => {
 
 app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
-  const user = userDb[userID]
   const id = generateRandomString()
   const longURL = req.body.longURL
   const url = { userID, longURL }
@@ -171,7 +174,7 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const userId = req.session.user_id;
   const user = userDb[userId];
-  if (!user) {
+  if (!isLoggedin(req, userDb)) {
     res.status(403).send('Please log in to edit url')
   }
 
@@ -179,24 +182,25 @@ app.get("/urls/:id", (req, res) => {
     res.status(403).send('Only the owner may have edit access to this url')
   }
 
-  const longURL = req.body.longURL
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user };
   res.render("urls_show", templateVars);
 });
 
 // EDIT
 app.post("/urls/:id/edit", (req, res) => {
-  const longURL = req.body.longURL
-  const userID = req.session.user_id;
-  const url = { userID, longURL }
-  urlDatabase[id] = url
-
-  const user = userDb[userID]
+  const user = isLoggedin(req, userDb)
   if (!user) {
     return res.redirect("/login");
   }
+  const id = req.params.id
 
-  urlDatabase[id].longUrl = longURL
+  const longURL = req.body.longURL  //new longURL
+  const userID = user.id; //cookie
+  const url = { userID, longURL } // keys from urlDatabase
+  urlDatabase[id] = url // userID from urlDatabase
+
+  // const user = userDb[userID]
+
   res.redirect("/urls");
 });
 

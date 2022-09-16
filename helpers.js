@@ -17,11 +17,13 @@ function getUserByEmail(email, userDb) {
   return undefined;
 };
 
-const isLoggedin = (req) => {
-  if (req.session.user_id) {
-    return true;
+const isLoggedin = (req, userDb) => {
+  const userId = req.session.user_id;
+  const user = userDb[userId];
+  if (user) {
+    return user;
   }
-  return false;
+  return null;
 };
 
 module.exports = {
