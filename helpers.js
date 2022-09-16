@@ -11,10 +11,10 @@ function getUserByEmail(email, userDb) {
   for (const key in userDb) {
     const user = userDb[key];
     if (email === user.email) {
-      return user;
+      return key;
     }
   }
-  return null;
+  return undefined;
 };
 
 const isLoggedin = (req) => {

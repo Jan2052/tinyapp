@@ -4,7 +4,7 @@ const {
   // generateRandomString,
   getUserByEmail,
   // isLoggedin
-} = require('./helpers');
+} = require('../helpers');
 
 const testUsers = {
   "userRandomID": {
@@ -23,6 +23,14 @@ describe('getUserByEmail', function() {
   it('should return a user with valid email', function() {
     const user = getUserByEmail("user@example.com", testUsers)
     const expectedUserID = "userRandomID";
+    assert.equal(user, expectedUserID)
+  });
+});
+
+describe('getUserByEmail', function() {
+  it('should return undefined for a user that is not in our user database', function() {
+    const user = getUserByEmail("hello@example.com", testUsers)
+    const expectedUserID = undefined;
     assert.equal(user, expectedUserID)
   });
 });
