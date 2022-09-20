@@ -34,7 +34,7 @@ const userDb = {
   'aJ48lW': {
     id: 'aJ48lW',
     email: 'hello@gmail.com',
-    password: '123',
+    password: '$2a$10$CO/nibFz9ge2SZgJ3KS2RelhQnkUdOBTymrF600HWhS1gQEyXIYku',
   },
   UPTXRn: {
     id: 'UPTXRn',
@@ -48,14 +48,23 @@ const userDb = {
   },
 };
 
+// Main page
+app.get("/", (req, res) => {
+  const userId = req.session.user_id;
+  console.log("session id", userId);
+  const user = userDb[userId];
+  if (!user) {
+    return res.redirect('/login');
+  }
+});
+
 // URL page and shows USERNAME when logged in
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
   console.log("session id", userId);
   const user = userDb[userId];
   if (!user) {
-    res.send('Please log in or register');
-    return;
+    return res.send('Please log in or register');
   }
 
   const userURL = {};
@@ -71,11 +80,11 @@ app.get("/urls", (req, res) => {
 
 //redirects to tiny url
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
+  const longURL = urlDatabase[req.params.id].longURL;
   if (longURL) {
-    res.redirect(longURL);
-    return;
+    return res.redirect(longURL);
   }
+
   res.send('404 Page not found');
 });
 
@@ -154,7 +163,7 @@ app.post("/login", (req, res) => {
 // LOGOUT
 app.post('/logout', (req, res) => {
   req.session = null;
-  res.redirect('urls');
+  res.redirect('/login');
 });
 
 app.post("/urls", (req, res) => {
@@ -197,7 +206,7 @@ app.post("/urls/:id/edit", (req, res) => {
   const url = { userID, longURL };
   urlDatabase[id] = url;
 
-  res.redirect("/urls");
+  res.redirect(`/urls/${id}`);
 });
 
 // DELETE
