@@ -100,6 +100,16 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+// Create new URL
+app.post("/urls", (req, res) => {
+  const userID = req.session.user_id;
+  const id = generateRandomString();
+  const longURL = req.body.longURL;
+  const url = { userID, longURL };
+  urlDatabase[id] = url;
+  res.redirect(`/urls/${id}`);
+});
+
 // REGISTER page
 app.get("/register", (req, res) => {
   const { email, password } = req.body;
@@ -164,17 +174,6 @@ app.post("/login", (req, res) => {
 app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect('/login');
-});
-
-app.post("/urls", (req, res) => {
-  const userID = req.session.user_id;
-  const id = generateRandomString();
-  const longURL = req.body.longURL;
-  const url = { userID, longURL };
-  urlDatabase[id] = url;
-
-  res.redirect("/urls");
-  console.log(req.body);
 });
 
 // EDIT page
