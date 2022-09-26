@@ -58,7 +58,7 @@ app.get("/", (req, res) => {
   }
 });
 
-// URL page and shows USERNAME when logged in
+// URL page
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
   console.log("session id", userId);
@@ -94,7 +94,7 @@ app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
   const user = userDb[userId];
   if (!isLoggedin(req, userDb)) {
-    return res.redirect("/login");
+    res.redirect('/login')
   }
   const templateVars = { urls: urlDatabase, user };
   res.render("urls_new", templateVars);
@@ -102,6 +102,9 @@ app.get("/urls/new", (req, res) => {
 
 // Create new URL
 app.post("/urls", (req, res) => {
+  if (!isLoggedin(req, userDb)) {
+    return res.status(403).send('Please log in');
+  }
   const userID = req.session.user_id;
   const id = generateRandomString();
   const longURL = req.body.longURL;
@@ -129,7 +132,7 @@ app.post("/register", (req, res) => {
   const { email, password } = req.body;
 
   if (email === '' || password === '') {
-    return res.status(400).send('Missing information', email);
+    return res.status(400).send('All fields are required to be filled in for registration. Please enter an email and password.');
   }
 
   if (getUserByEmail(email, userDb)) {
@@ -205,7 +208,7 @@ app.post("/urls/:id/edit", (req, res) => {
   const url = { userID, longURL };
   urlDatabase[id] = url;
 
-  res.redirect(`/urls/${id}`);
+  res.redirect('/urls');
 });
 
 // DELETE
