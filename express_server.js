@@ -16,13 +16,14 @@ app.use(express.urlencoded({ extended: true }));
 const {
   generateRandomString,
   getUserByEmail,
-  isLoggedin
+  isLoggedin,
+  urlExists
 } = require('./helpers');
 
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
+    userID: "UPTXRn",
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
@@ -31,7 +32,7 @@ const urlDatabase = {
 };
 
 const userDb = {
-  'aJ48lW': {
+  aJ48lW: {
     id: 'aJ48lW',
     email: 'hello@gmail.com',
     password: '$2a$10$CO/nibFz9ge2SZgJ3KS2RelhQnkUdOBTymrF600HWhS1gQEyXIYku',
@@ -51,19 +52,17 @@ const userDb = {
 // Main page
 app.get("/", (req, res) => {
   const userId = req.session.user_id;
-  console.log("session id", userId);
-  const user = userDb[userId];
-  if (!user) {
+  if (!isLoggedin(req, userDb)) {
     return res.redirect('/login');
   }
+  res.redirect('/urls')
 });
 
 // URL page
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
-  console.log("session id", userId);
   const user = userDb[userId];
-  if (!user) {
+  if (!isLoggedin(req, userDb)) {
     return res.send('Please log in or register');
   }
 
@@ -131,7 +130,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
 
-  if (email === '' || password === '') {
+  if (!email || password) {
     return res.status(400).send('All fields are required to be filled in for registration. Please enter an email and password.');
   }
 
@@ -182,14 +181,19 @@ app.post('/logout', (req, res) => {
 // EDIT page
 app.get("/urls/:id", (req, res) => {
   const userId = req.session.user_id;
+  const userID = urlDatabase[req.params.id].userID
   const user = userDb[userId];
   if (!isLoggedin(req, userDb)) {
     res.status(403).send('Please log in to edit url');
   }
 
-  if (userId !== urlDatabase[req.params.id].userID) {
+  if (userId !== userID) {
     res.status(403).send('Only the owner may have edit access to this url');
   }
+
+  // if (urlExists){
+  //   console.log("IF URL EXISTS", urlExists)
+  // }
 
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user };
   res.render("urls_show", templateVars);
@@ -215,6 +219,10 @@ app.post("/urls/:id/edit", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const userId = req.session.user_id;
   const user = userDb[userId];
+
+  if (!isLoggedin(req, userDb)) {
+    res.status(403).send('Please log in to delete this url');
+  }
   if (!user) {
     res.status(403).send('Please log in to delete this url');
   }

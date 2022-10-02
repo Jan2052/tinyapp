@@ -26,8 +26,18 @@ const isLoggedin = (req, userDb) => {
   return null;
 };
 
+const urlExists = (urlDatabase) => {
+  for ( shortURL of urlDatabase){
+    if (!shortURL) {
+      return false;
+    }
+  }
+  return true;
+};
+
 module.exports = {
   generateRandomString,
   getUserByEmail,
-  isLoggedin
+  isLoggedin,
+  urlExists
 };
