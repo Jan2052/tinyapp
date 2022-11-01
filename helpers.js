@@ -26,13 +26,11 @@ const isLoggedin = (req, userDb) => {
   return null;
 };
 
-const urlExists = (urlDatabase) => {
-  for ( shortURL of urlDatabase){
-    if (!shortURL) {
-      return false;
-    }
+const urlExists = (id, urlDatabase) => {
+  if (Object.keys(urlDatabase).includes(id)){
+    return true;
   }
-  return true;
+  return false;
 };
 
 module.exports = {

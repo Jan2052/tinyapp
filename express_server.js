@@ -119,7 +119,7 @@ app.get("/register", (req, res) => {
   const user = userDb[userId];
 
   if (isLoggedin(req, userDb)) {
-    return res.status(403).send('You are already registered');
+    return res.redirect('/urls')
   }
 
   const templateVars = { urls: urlDatabase, user, email: email, password: password };
@@ -180,9 +180,16 @@ app.post('/logout', (req, res) => {
 
 // EDIT page
 app.get("/urls/:id", (req, res) => {
+  const id = req.params.id
+
+  if (!urlExists(id, urlDatabase)) {
+    res.status(403).send('URL does not exist');
+  }
+
   const userId = req.session.user_id;
-  const userID = urlDatabase[req.params.id].userID
+  const userID = urlDatabase[id].userID
   const user = userDb[userId];
+
   if (!isLoggedin(req, userDb)) {
     res.status(403).send('Please log in to edit url');
   }
@@ -191,19 +198,18 @@ app.get("/urls/:id", (req, res) => {
     res.status(403).send('Only the owner may have edit access to this url');
   }
 
-  // if (urlExists){
-  //   console.log("IF URL EXISTS", urlExists)
-  // }
-
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user };
   res.render("urls_show", templateVars);
 });
 
 // EDIT
 app.post("/urls/:id/edit", (req, res) => {
-  const user = isLoggedin(req, userDb);
-  if (!user) {
-    return res.redirect("/login");
+  if (!isLoggedin(req, userDb)) {
+    res.status(403).send('Please log in to edit url');
+  }
+ const user = isLoggedin(req, userDb)
+  if (user !== Object.keys(urlDatabase)) {
+    res.status(403).send('Only the owner may have edit access to this url');
   }
   const id = req.params.id;
 
