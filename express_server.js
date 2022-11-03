@@ -207,10 +207,11 @@ app.post("/urls/:id/edit", (req, res) => {
   if (!isLoggedin(req, userDb)) {
     res.status(403).send('Please log in to edit url');
   }
+  
  const user = isLoggedin(req, userDb)
-  if (user !== Object.keys(urlDatabase)) {
-    res.status(403).send('Only the owner may have edit access to this url');
-  }
+ if (user !== urlDatabase[id].userID) {
+  res.status(403).send('Only the owner may have edit access to this url');
+}
   const id = req.params.id;
 
   const longURL = req.body.longURL;
